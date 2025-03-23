@@ -1,0 +1,17 @@
+@startuml
+start
+if (Terms of Service) then (Disagree)
+#pink:Disconnect;
+stop
+else (Agree)
+if (Code of Conduct) then (Disagree)
+#pink:Disconnect;
+stop
+else (Agree)
+:Enter Email;
+:Select Race;
+:Select Class;
+:Confirm Character;
+#palegreen:enter game;
+stop
+@enduml
