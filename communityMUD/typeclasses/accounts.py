@@ -24,6 +24,12 @@ several more options for customizing the Guest account system.
 
 from evennia.accounts.accounts import DefaultAccount, DefaultGuest
 
+# Lazy import to avoid circular imports
+def get_start_chargen():
+    """Lazy import of start_chargen to avoid circular imports."""
+    from typeclasses.chargen import start_chargen
+    return start_chargen
+
 
 class Account(DefaultAccount):
     """
@@ -133,10 +139,48 @@ class Account(DefaultAccount):
      - at_post_remove_character(char)
      - at_pre_channel_msg(message, channel, senders=None, **kwargs)
      - at_post_chnnel_msg(message, channel, senders=None, **kwargs)
-
     """
+    
+    def at_account_creation(self):
+        """
+        This is called once, the very first time
+        the player is created (i.e. first time they
+        register with the game). It's a good place
+        to store attributes all players should have,
+        like configuration values etc.
+        """
+        # Set an (empty) attribute holding the characters this account has
+        # created. This allows players to have multiple characters and easily
+        # switch between them.
+        self.db._playable_characters = []
+        self.db._last_puppet = None
+        
+    def at_post_login(self, session=None):
+        """
+        Called at the end of the login process, just before letting
+        the account loose.
 
-    pass
+        Args:
+            session (Session, optional): Session logging in, if any.
+
+        Notes:
+            This is called *before* an eventual Character's
+            `at_post_login` hook. By default it creates a new
+            character and puppets it.
+        """
+        super().at_post_login(session=session)
+        
+        # Check if this is a brand new account (no characters)
+        if not self.db._playable_characters:
+            # Start character generation
+            start_chargen = get_start_chargen()
+            self.msg("\nWelcome to the game! Let's create your first character.")
+            start_chargen(self)
+        # If the account has a character but hasn't completed chargen, resume it
+        elif self.db._last_puppet and not self.db._last_puppet.db.chargen_complete:
+            start_chargen = get_start_chargen()
+            self.msg("\nLet's complete your character creation.")
+            start_chargen(self)
 
 
 class Guest(DefaultGuest):

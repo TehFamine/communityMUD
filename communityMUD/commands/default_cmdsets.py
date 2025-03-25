@@ -15,6 +15,12 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 """
 
 from evennia import default_cmds
+from evennia.commands.default import account
+
+# Custom imports
+from commands import account as custom_account
+from commands import character
+from commands import unloggedin as custom_unloggedin
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -34,6 +40,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
+        self.add(character.CmdScore())
+        self.add(character.CmdCharacterInfo())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
@@ -54,6 +62,9 @@ class AccountCmdSet(default_cmds.AccountCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
+        # Replace default charcreate with our custom version
+        self.remove(account.CmdCharCreate)
+        self.add(custom_account.CmdCharCreate())
 
 
 class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
@@ -72,6 +83,11 @@ class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
+
+        # Replace the default create command with our custom version
+        # that includes ToS and CoC confirmation
+        self.remove(default_cmds.CmdUnconnectedCreate)
+        self.add(custom_unloggedin.CmdUnconnectedCreate())
 
 
 class SessionCmdSet(default_cmds.SessionCmdSet):

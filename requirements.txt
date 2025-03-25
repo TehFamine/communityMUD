@@ -35,7 +35,6 @@ PyYAML==6.0.2
 simpleeval==1.0.0
 sqlparse==0.5.3
 Twisted==23.10.0
-twisted-iocpsupport==1.0.4
 txaio==23.1.1
 typeguard==4.4.2
 typing_extensions==4.12.2
